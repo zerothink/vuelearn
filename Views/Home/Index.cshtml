@@ -1,0 +1,134 @@
+﻿@using StudentDemo.Models;
+@{ 
+    var students = ViewBag.students;
+}
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<script type="text/javascript" src="~/Scripts/jquery-3.3.1.js"></script>
+</head>
+<body>
+    <div>
+        <label>学号</label><input id="xuehao" type="text"><br>
+        <label>姓名</label><input id="xingming" type="text"><br>
+        <label>性别</label><input id="xingbie" type="text"><br>
+        <button onclick="Add()">增加</button>
+    </div>
+    <div>
+        <table id="compony-table" class="table table-hover">
+            <thead>
+            <tr>
+                <th>学号</th>
+                <th>姓名</th>
+                <th>性别</th>
+            </tr>
+            </thead>
+            <tbody id="componyBody">
+            @foreach (var student in students)
+            {
+                <tr>
+                    <td>@student.sno</td>
+                    <td>@student.name</td>
+                    <td>@student.gender</td>
+                    <td>
+
+                        <ul>
+                            <li><a href="javascript:void(0);" onclick="Delete(@student.sno)">删除</a></li>
+                        </ul>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        <div>
+            <label>验证码</label><input type="text" style="width: 100px;" id="phone"/><button onclick="getCode()">获取验证码</button>
+        </div>
+    </div>
+    <script>
+        function Delete(sno) {
+            if (confirm("确认删除备案单位吗？")) {
+                $.ajax({
+                    url: "/Home/Delete",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        sno: sno
+                    },
+                    success: function (response) {
+                        var result = JSON.parse(response);
+                        if (result.key == "ok") {
+                            window.location.reload();
+                        }
+                        else {
+                            alert(result.description)
+                        }
+                    }
+                });
+            }
+        }
+
+        function Add() {
+            var sno = $("#xuehao").val();
+            var name = $("#xingming").val();
+            var gender = $("#xingbie").val();
+            $.ajax({
+                url: "/Home/Add",
+                method: "POST",
+                dataType: "json",
+                data: {
+                    sno:sno,
+                    name: name,
+                    gender: gender
+                },
+                success: function (response) {
+                    var result = JSON.parse(response);
+                    if (result.key == "ok") {
+                        window.location.reload();
+                    }
+                    else {
+                        alert(result.description);
+                    }
+                }
+            })
+        }
+
+        function test () {
+            $.ajax({
+                url: "/Home/test",
+                method: "POST",
+                dataType: "json",
+                success: function(result) {
+                    console.log(result);
+                    window.alert("10s后去查数据库 ");
+                }
+            });
+        }
+
+        function getCode() {
+            var phoneNum = $('#phone').val();
+            var phoneArray = [];
+            var Num=""; 
+            for(var i=0;i<6;i++) 
+            { 
+                Num+=Math.floor(Math.random()*10); 
+            } 
+            phoneArray.push(phoneNum);
+            $.ajax({
+                url: "/Home/SendCode",
+                method: "POST",
+                dataType: "json",
+                data: {
+                    phoneNum: phoneArray,
+                    code: Num
+                },
+                success: function(result) {
+                    console.log(result);
+                    window.alert(" 成功返回");
+                }
+            });
+        }
+    </script>
+</body>
+</html>
